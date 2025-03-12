@@ -1,0 +1,31 @@
+1. Collect source of dataset from Kaggle
+2. Split data set 70:15:15 (Train - Validation - Testing)
+3. Train the model into .pth file with CNN Method complete with the label using [train.py]
+4. After training complete, test it using [main.py]
+
+Options
+1. Do data collection by myself run the dataCollection.py and record each letter by urself for the dataset
+----
+1. Use data set from internet (which i get from Kaggle)
+
+Current Feature
+1. Python version i use [3.10.0], make sure your python version compatible with each feature i have
+2. Split data set you can run [splitDataSet.py], you can adjust the data set into whatever you want
+3. Check availability camera IN CASE you have external camera. You can run [cameraAvailability.py]
+
+Feature Update
+1. Know moving letter such as 'J' and 'Z'
+2. Know word or sentences
+3. Feedback AI Error, if in case either letter, word, or sentences given false prediction 
+
+NOTES
+1. CURRENT TRAINED MODEL INFORMATION
+    - EPOCH: 42/50
+    - TRAIN LOSS: 0.4714
+    - TRAIN ACC: 84.79%
+    - VAL LOSS: 0.5574
+    - VAL ACC: 84.47%
+"FEEL FREE TO CONTACT ME IF THERE IS ANY OTHER WAY TO MAKE THE ACCURACY BETTER, I WILL MAKE YOU AS A CONTRIBUTOR AND LET YOU MODIFY THE CODE FOR BETTER ACCURACY"
+
+2. This code managed by: fzjourney
+"www.github.com/fzjourney"
