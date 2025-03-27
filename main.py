@@ -7,10 +7,12 @@ import tkinter as tk
 from tkinter import filedialog
 import numpy as np
 
+# Model and label paths
 MODEL_PATH = "Model/cnn_model.pth"
 LABELS_PATH = "Model/labels.txt"
 IMG_SIZE = 64
 
+# Define CNN model class
 class SignLanguageCNN(torch.nn.Module):
     def __init__(self, num_classes):
         super(SignLanguageCNN, self).__init__()
@@ -33,14 +35,17 @@ class SignLanguageCNN(torch.nn.Module):
         x = self.fc2(x)
         return x
 
+# Load class labels
 with open(LABELS_PATH, "r") as f:
     class_names = [line.strip() for line in f.readlines()]
 
+# Load model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = SignLanguageCNN(len(class_names)).to(device)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.eval()
 
+# Image preprocessing
 transform = transforms.Compose([
     transforms.Resize((IMG_SIZE, IMG_SIZE)),
     transforms.ToTensor(),
@@ -54,6 +59,7 @@ def preprocess_image(img):
     return img
 
 def predict_from_image():
+    """ Function to predict sign language from an uploaded image """
     root = tk.Tk()
     root.withdraw()
     file_path = filedialog.askopenfilename(title="Select an Image", filetypes=[("Image Files", "*.jpg;*.png;*.jpeg")])
@@ -71,8 +77,9 @@ def predict_from_image():
 
     print(f"Prediction: {class_name} ({confidence_score:.2f}%)")
 
-camera = cv2.VideoCapture(1)
-detector = HandDetector(detectionCon=0.8, maxHands=1)
+# Initialize camera and hand detector
+camera = cv2.VideoCapture(0)
+detector = HandDetector(detectionCon=0.8, maxHands=1, staticMode=False, modelComplexity=1)
 
 prev_bbox = None
 stabilization_threshold = 20  
@@ -83,7 +90,6 @@ while True:
         break
 
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
     hands, _ = detector.findHands(frame, draw=False)  
 
     if hands:
@@ -101,11 +107,14 @@ while True:
 
         prev_bbox = (x, y, w, h)
 
+        # Extract hand image
         padding = 30
-        x1, y1 = max(0, x - padding), max(0, y - padding)
-        x2, y2 = min(frame.shape[1], x + w + padding), min(frame.shape[0], y + h + padding)
+        side_length = max(w, h) + 2 * padding  
+        x1, y1 = max(0, x - (side_length - w) // 2), max(0, y - (side_length - h) // 2)
+        x2, y2 = min(frame.shape[1], x1 + side_length), min(frame.shape[0], y1 + side_length)
 
         hand_img = frame_rgb[y1:y2, x1:x2]  
+        
         if hand_img.size != 0:
             hand_tensor = preprocess_image(hand_img)  
 
@@ -118,14 +127,17 @@ while True:
             text = f"{class_name} ({confidence_score:.2f}%)"
             cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
 
+    # Display instructions
     cv2.putText(frame, "Press 'I' to upload an image", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
     cv2.imshow("Sign Language Recognition", frame)
 
+    # Handle keyboard inputs
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
         break
     elif key == ord('i'):
         predict_from_image()
 
+# Release resources
 camera.release()
 cv2.destroyAllWindows()
